@@ -1,0 +1,5 @@
+/* Custom CSS to remove spinner controls */
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
