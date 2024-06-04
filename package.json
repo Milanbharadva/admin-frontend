@@ -4,7 +4,6 @@
   "homepage": "/admin",
   "private": true,
   "dependencies": {
-    "@fonticonpicker/react-fonticonpicker": "^1.2.0",
     "@fortawesome/fontawesome-free": "^6.5.2",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^15.0.7",
