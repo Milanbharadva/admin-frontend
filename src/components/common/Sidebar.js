@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { getRoutePath, getUserData } from "../../global";
+import {
+  errorToast,
+  getRoutePath,
+  getUserData,
+  handleApiCall,
+} from "../../global";
 
 const SidebarNavItem = ({ item, index, level = 0 }) => {
   const collapseId = `collapse-${index}-${level}`;
@@ -70,14 +75,27 @@ const Sidebar = ({ toggleSidebar }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      try {
-        const userData = await getUserData();
-        setNavbarItems(userData?.menus || []);
-      } catch (error) {
-        navigate(getRoutePath("login"));
+      if (localStorage.getItem("changed")) {
+        try {
+          const onSuccess = (result) => {
+            setNavbarItems(result.data.records || []);
+          };
+          const onError = (error) => {
+            errorToast(error.message);
+          };
+          handleApiCall({
+            method: "POST",
+            apiPath: "/menus/list",
+            onSuccess,
+            onError,
+          });
+        } catch (error) {
+          navigate(getRoutePath("login"));
+        }
+      } else {
+        setNavbarItems(JSON.parse(localStorage.getItem("userData")).menus);
       }
     };
-
     fetchUserData();
   }, [navigate]);
 

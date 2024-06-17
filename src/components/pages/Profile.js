@@ -74,7 +74,6 @@ const Profile = () => {
 
     formdata.forEach((value, key) => {
       if (!value) {
-        console.log(key);
         newErrors[key] = "This field is required.";
         hasErrors = true;
         if (!firstEmptyFieldFocused) {

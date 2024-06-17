@@ -60,7 +60,7 @@ export const handleApiCall = async ({
       removeLocalStorage("userData");
       window.location.href = window.location.origin + "/admin/login";
     } else if (error.response && error.response.status === 403) {
-      errorToast(error.response.data.message);
+      // errorToast(error.response.data.message);
       onError(error.response.data);
     } else if (error.response && error.response.status === 500) {
       onError(error.response.data);

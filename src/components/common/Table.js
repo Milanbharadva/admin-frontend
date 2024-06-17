@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   changeDateFormat,
+  errorToast,
   getRoutePath,
   handleApiCall,
   successToast,
@@ -64,7 +65,9 @@ const Table = ({
       reRender();
       successToast(result.message);
     };
-    const onError = (error) => {};
+    const onError = (error) => {
+      errorToast(error.message);
+    };
     handleApiCall({
       method: "DELETE",
       apiPath: `/${page.toLowerCase()}/delete/${id}`,

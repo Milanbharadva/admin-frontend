@@ -1,10 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Nestable from "react-nestable";
-import {
-  AiOutlineDrag,
-  AiFillCaretRight,
-  AiFillCaretDown,
-} from "react-icons/ai";
 import {
   errorToast,
   getLocalStorage,
@@ -39,12 +33,7 @@ const styles = {
   formContainer: { padding: "2rem", backgroundColor: "#f9f9f9" },
 };
 
-const Handler = () => <AiOutlineDrag />;
-const Collapser = ({ isCollapsed }) =>
-  isCollapsed ? <AiFillCaretRight /> : <AiFillCaretDown />;
-
 export default function Menus() {
-  const [collapseAll, setCollapseAll] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [idDelete, setIdDelete] = useState(true);
@@ -58,21 +47,13 @@ export default function Menus() {
   const [icon, setIcon] = useState("");
   const [userData, setUserData] = useState(null);
 
-  useEffect(() => {
-    const userData = JSON.parse(getLocalStorage("userData"));
-    if (userData?.menus) {
-      setUserData(userData.menus);
-      setLoading(false);
-      setItems(convertToNestedFormat(userData.menus));
-    }
-  }, []);
-
   const FetchMenu = () => {
     let formData = new FormData();
     formData.append("sort_column", "id");
     formData.append("sort_by", "asc");
     const onSuccess = (result) => {
       setUserData(result.data.records);
+      setItems(convertToNestedFormat(result.data.records));
       const userDatalocal = JSON.parse(getLocalStorage("userData"));
       userDatalocal.menus = result.data.records;
       setLocalStorage("userData", JSON.stringify(userDatalocal));
@@ -92,27 +73,53 @@ export default function Menus() {
   };
 
   useEffect(() => {
-    // FetchMenu();
+    FetchMenu();
   }, []);
+  useEffect(() => {
+    if (window.sortNestDemo && items.length > 0) {
+      setTimeout(() => {
+        window.sortNestDemo.init();
+      }, 2000); // Ensure this delay matches the one in your script
+    }
+  }, [items]);
 
-  const handleMenuChange = (updatedItems) => {
-    setItems(updatedItems.items || []);
-    const flatItems = convertToFlatFormat(updatedItems.items || []);
-    const userDatalocal = JSON.parse(getLocalStorage("userData"));
-    userDatalocal.menus = flatItems;
-    setLocalStorage("userData", JSON.stringify(userDatalocal));
-  };
-  const handleSave = () => {
-    const flatItems = convertToFlatFormat(items);
-    const userDatalocal = JSON.parse(getLocalStorage("userData"));
-    userDatalocal.menus = flatItems;
-    setLocalStorage("userData", JSON.stringify(userDatalocal));
-    successToast("Changes saved successfully");
-  };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+  const handleDeleteMenu = (id) => {
+    if (window.confirm("Are you sure You Want to delete menu")) {
+      handleApiCall({
+        method: "DELETE",
+        apiPath: `/menus/delete/${id}`,
+        onSuccess: (result) => {
+          successToast(result.message);
+          FetchMenu();
+        },
+        onError: (error) => {
+          errorToast(error);
+        },
+      });
+    }
+  };
+  const handleSaveMenu = () => {
+    if (document.getElementById("nestableOutput").innerHTML.length > 0) {
+      handleApiCall({
+        method: "POST",
+        apiPath: `/menus/update`,
+        body: JSON.parse(document.getElementById("nestableOutput").innerHTML),
+        onSuccess: (result) => {
+          successToast(result.message);
+        },
+        onError: (error) => {
+          errorToast(error.message);
+        },
+      });
+    } else {
+      successToast("Menu updated successfully");
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     let newItem;
@@ -137,8 +144,11 @@ export default function Menus() {
       };
     }
 
-    const onSuccess = (result) => successToast(result.message);
-    const onError = (error) => errorToast(error);
+    const onSuccess = (result) => {
+      successToast(result.message);
+      FetchMenu();
+    };
+    const onError = (error) => errorToast(error.message);
     handleApiCall({
       method: "POST",
       apiPath: "/menus/create",
@@ -146,8 +156,6 @@ export default function Menus() {
       onSuccess,
       onError,
     });
-    setItems([...items, newItem]);
-    setFormData({ title: "", icon: "", path: "", parent_id: 0 });
   };
 
   const deleteItem = (id) => {
@@ -155,7 +163,9 @@ export default function Menus() {
       FetchMenu();
       warnToast(result.message);
     };
-    const onError = (error) => {};
+    const onError = (error) => {
+      errorToast(error.message);
+    };
     handleApiCall({
       method: "DELETE",
       apiPath: `/menus/delete/${a}`,
@@ -163,197 +173,242 @@ export default function Menus() {
       onError,
     });
   };
+  const renderItems = (items) => {
+    return (
+      <ol className="dd-list">
+        {items.map((item) => (
+          <li className="dd-item" data-id={item.id} key={item.id}>
+            {item.children && item.children.length > 0 && (
+              <>
+                <button
+                  className="dd-collapse"
+                  data-action="collapse"
+                  type="button"
+                >
+                  Collapse
+                </button>
+                <button
+                  className="dd-expand"
+                  data-action="expand"
+                  type="button"
+                >
+                  Expand
+                </button>
+              </>
+            )}
+            <div className="dd-handle">
+              <div className="d-flex align-items-center">
+                <span
+                  className="drag-indicator"
+                  style={item.children.length > 0 ? { opacity: 0 } : {}}
+                ></span>
+                <div>{item.title}</div>
+              </div>
+              <div className="dd-nodrag btn-group ml-auto align-self-end">
+                <button
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => {
+                    handleDeleteMenu(item.id);
+                  }}
+                >
+                  <i className="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+            {item.children &&
+              item.children.length > 0 &&
+              renderItems(item.children)}
+          </li>
+        ))}
+      </ol>
+    );
+  };
+  const generateOptions = (options) => {
+    return (
+      options &&
+      options.map((option) => {
+        // Create the main option
+        const mainOption = (
+          <option value={option.id} key={option.id}>
+            {option.title}
+          </option>
+        );
 
+        // Check if there are sub_menus and generate their options
+        if (option.sub_menus && option.sub_menus.length > 0) {
+          const subOptions = generateOptions(option.sub_menus);
+          return [mainOption, ...subOptions]; // Include the main option and its sub-options
+        } else {
+          return [mainOption]; // No sub-options, just return the main option
+        }
+      })
+    );
+  };
   return (
     <main className="main" id="main">
       {loading ? (
         <Loader />
       ) : (
-        <div className="container-fluid">
-          <div className="modal fade" id="basicModal" tabIndex="-1">
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Asking Confirmation</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div className="modal-body">Do You Want To Delete Menu ?</div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    NO
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    onClick={() => deleteItem(idDelete)}
-                  >
-                    YES
-                  </button>
+        items.length > 0 && (
+          <div className="container-fluid">
+            <div className="modal fade" id="basicModal" tabIndex="-1">
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Asking Confirmation</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div className="modal-body">Do You Want To Delete Menu ?</div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      data-bs-dismiss="modal"
+                    >
+                      NO
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      data-bs-dismiss="modal"
+                      onClick={() => deleteItem(idDelete)}
+                    >
+                      YES
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6" style={{ padding: "2rem" }}>
-              <header style={{ marginBottom: "1rem" }}>
-                <h1>Menus</h1>
-                <button
-                  onClick={() => setCollapseAll(!collapseAll)}
-                  style={styles.actionButton}
-                >
-                  {collapseAll ? "Expand All" : "Collapse All"}
-                </button>
-                <button
-                  onClick={() => handleSave()}
-                  style={styles.actionButton}
-                >
-                  Save Changes
-                </button>
-              </header>
-              <Nestable
-                items={items}
-                renderItem={renderItem}
-                handler={<Handler />}
-                renderCollapseIcon={({ isCollapsed }) => (
-                  <Collapser isCollapsed={isCollapsed} />
-                )}
-                collapsed={collapseAll}
-                onChange={handleMenuChange}
-              />
-            </div>
-            <div className="col-md-6" style={styles.formContainer}>
-              <h2>Create Menu</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="row mt-3">
-                  {[
-                    { label: "Title", name: "title" },
-                    { label: "Path", name: "path" },
-                  ].map((field) => (
-                    <div className="mb-2" key={field.name}>
-                      <div className="col-12 d-sm-flex gap-3 align-items-center">
-                        <label
-                          htmlFor={field.name}
-                          className="text-nowrap col-2"
+            <div className="row">
+              <div className="col-md-6" style={{ padding: "2rem" }}>
+                <main>
+                  <div className="wrapper">
+                    <div className="page">
+                      <button
+                        type="submit"
+                        onClick={handleSaveMenu}
+                        className="btn btn-primary me-2"
+                      >
+                        Save Changes
+                      </button>
+                      <div className="page-inner">
+                        <div id="sortablemulti" className="row"></div>
+                        <div className="row">
+                          <div className="">
+                            <section className="card card-fluid">
+                              <div id="nestable01" className="dd">
+                                {renderItems(items)}
+                              </div>
+                            </section>
+                          </div>
+                        </div>
+                        <div
+                          className="section-block"
+                          style={{ display: "none" }}
                         >
-                          {field.label}
-                        </label>
-                        <div className="input-group has-validation">
-                          <input
-                            type="text"
-                            name={field.name}
-                            value={formData[field.name]}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            id={field.name}
-                          />
+                          <pre id="nestableOutput"></pre>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                </main>
+              </div>
+              <div className="col-md-6" style={styles.formContainer}>
+                <h2>Create Menu</h2>
+                <form onSubmit={handleSubmit}>
+                  <div className="row mt-3">
+                    {[
+                      { label: "Title", name: "title" },
+                      { label: "Path", name: "path" },
+                    ].map((field) => (
+                      <div className="mb-2" key={field.name}>
+                        <div className="col-12 d-sm-flex gap-3 align-items-center">
+                          <label
+                            htmlFor={field.name}
+                            className="text-nowrap col-2"
+                          >
+                            {field.label}
+                          </label>
+                          <div className="input-group has-validation">
+                            <input
+                              type="text"
+                              name={field.name}
+                              value={formData[field.name]}
+                              onChange={handleInputChange}
+                              className="form-control"
+                              id={field.name}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
 
-                  <div className="mb-2" key="parent_id">
-                    <div className="col-12 d-sm-flex gap-3 align-items-center">
-                      <label htmlFor="parent_id" className="text-nowrap col-2">
-                        Parent ID
-                      </label>
-                      <div className="input-group has-validation">
-                        <select
-                          className="form-select form-select-sm"
-                          name="parent_id"
-                          value={formData.parent_id}
-                          onChange={handleInputChange}
+                    <div className="mb-2" key="parent_id">
+                      <div className="col-12 d-sm-flex gap-3 align-items-center">
+                        <label
+                          htmlFor="parent_id"
+                          className="text-nowrap col-2"
                         >
-                          <option value="0">root</option>
-                          {userData.map((option) => (
-                            <option value={option.id} key={option.id}>
-                              {option.title}
-                            </option>
-                          ))}
-                        </select>
+                          Parent ID
+                        </label>
+                        <div className="input-group has-validation">
+                          <select
+                            className="form-select form-select-sm"
+                            name="parent_id"
+                            value={formData.parent_id}
+                            onChange={handleInputChange}
+                          >
+                            <option value="0">root</option>
+                            {!loading && generateOptions(userData)}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mb-2" key="Status">
+                      <div className="col-12 d-sm-flex gap-3 align-items-center">
+                        <label htmlFor="Status" className="text-nowrap col-2">
+                          Status
+                        </label>
+                        <div className="input-group has-validation">
+                          <select
+                            className="form-select form-select-sm"
+                            name="status"
+                            onChange={handleInputChange}
+                            defaultValue={1}
+                          >
+                            <option value="1">ON</option>
+                            <option value="0">OFF</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="mb-2" key="Status">
-                    <div className="col-12 d-sm-flex gap-3 align-items-center">
-                      <label htmlFor="Status" className="text-nowrap col-2">
-                        Status
-                      </label>
-                      <div className="input-group has-validation">
-                        <select
-                          className="form-select form-select-sm"
-                          name="status"
-                          onChange={handleInputChange}
-                          defaultValue={1}
-                        >
-                          <option value="1">ON</option>
-                          <option value="0">OFF</option>
-                        </select>
-                      </div>
-                    </div>
+                  <div className="text-end mt-2">
+                    <button type="submit" className="btn btn-primary me-2">
+                      Submit
+                    </button>
+                    <button type="reset" className="btn btn-secondary me-2">
+                      Reset
+                    </button>
                   </div>
-                </div>
-                <div className="text-end mt-2">
-                  <button type="submit" className="btn btn-primary me-2">
-                    Submit
-                  </button>
-                  <button type="reset" className="btn btn-secondary me-2">
-                    Reset
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
+        )
       )}
     </main>
   );
 }
-
-const renderItem = ({ item, index, collapseIcon, handler }) => (
-  <div style={styles.itemContainer}>
-    <div style={styles.index}>{index + 1}</div>
-    {handler}
-    {collapseIcon}
-    <div style={styles.text}>{item.text}</div>
-    <div style={styles.actions}>
-      <span
-        style={{ cursor: "pointer" }}
-        data-bs-toggle="modal"
-        data-bs-target="#basicModal"
-      >
-        <i
-          className="bi bi-trash"
-          onClick={() => {
-            a = item.id;
-          }}
-        ></i>
-      </span>
-    </div>
-  </div>
-);
-
 const convertToNestedFormat = (menuItems) => {
   return menuItems.map((item) => ({
     ...item,
     text: item.title,
     children: convertToNestedFormat(item.sub_menus || []),
-  }));
-};
-
-const convertToFlatFormat = (nestedItems) => {
-  return nestedItems.map((item) => ({
-    ...item,
-    sub_menus: item.children,
-    children: convertToFlatFormat(item.children || []),
   }));
 };

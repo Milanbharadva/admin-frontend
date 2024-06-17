@@ -92,6 +92,7 @@ const EditPermission = () => {
       };
       const onError = (error) => {
         errorToast(error.message);
+        setUpdating(true);
       };
       handleApiCall({
         method: "POST",

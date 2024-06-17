@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   adminName,
+  errorToast,
   getLocalStorage,
   getRoutePath,
   handleApiCall,
@@ -80,13 +81,15 @@ const ResetPassword = () => {
       const onError = (error) => {
         const newErrors = {};
         let empty = false;
-        Object.keys(error.error).map((item) => {
-          newErrors[item] = error.error[item][0];
-          if (!empty) {
-            document.getElementsByName(item)[0].focus();
-            empty = true;
-          }
-        });
+        errorToast(error.message);
+        error.error &&
+          Object.keys(error.error).map((item) => {
+            newErrors[item] = error.error[item][0];
+            if (!empty) {
+              document.getElementsByName(item)[0].focus();
+              empty = true;
+            }
+          });
         setErrors(newErrors);
         setLoading(false);
       };

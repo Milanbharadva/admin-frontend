@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   addBackendUrl,
+  errorToast,
   getRoutePath,
   handleApiCall,
   successToast,
@@ -32,6 +33,7 @@ const CreateUser = () => {
     };
     const onError = (error) => {
       setLoading(false);
+      errorToast(error.message);
     };
 
     handleApiCall({
@@ -90,13 +92,15 @@ const CreateUser = () => {
       const onError = (error) => {
         const newErrors = {};
         let empty = false;
-        Object.keys(error.error).map((item) => {
-          newErrors[item] = error.error[item][0];
-          if (!empty) {
-            document.getElementsByName(item)[0].focus();
-            empty = true;
-          }
-        });
+        error.error &&
+          Object.keys(error.error).map((item) => {
+            newErrors[item] = error.error[item][0];
+            if (!empty) {
+              document.getElementsByName(item)[0].focus();
+              empty = true;
+            }
+          });
+        errorToast(error.message);
         setErrors(newErrors);
         setAdding(false);
       };

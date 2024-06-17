@@ -104,6 +104,7 @@ const EditRole = () => {
       };
       const onError = (error) => {
         errorToast(error.message);
+        setUpdating(true);
       };
 
       handleApiCall({

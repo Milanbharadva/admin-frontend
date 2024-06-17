@@ -21,6 +21,9 @@ import ProtectedRoute from "./components/authentication/ProtectedRoute";
 import Configs from "./components/pages/Configs";
 import Menus from "./components/pages/Menus";
 import { getRoutePath } from "./global";
+import Error from "./components/common/Error";
+
+console.log = console.warn = console.error = () => {};
 
 const routes = [
   {
@@ -109,6 +112,11 @@ const routes = [
   {
     path: getRoutePath("reset-password"),
     component: ResetPassword,
+    layout: null,
+  },
+  {
+    path: getRoutePath("404"),
+    component: Error,
     layout: null,
   },
   {

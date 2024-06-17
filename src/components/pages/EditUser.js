@@ -69,6 +69,7 @@ const EditUser = () => {
     };
     const onError2 = (error) => {
       setLoadingRole(false);
+      errorToast(error.message);
     };
     setLoading(true);
     handleApiCall({

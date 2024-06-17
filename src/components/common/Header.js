@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   adminName,
+  errorToast,
   getRoutePath,
   getUserData,
   handleApiCall,
@@ -37,7 +38,9 @@ const Header = ({ toggleSidebar }) => {
           removeLocalStorage("userData");
           navigate(getRoutePath("login"));
         },
-        onError: (error) => console.error("Logout error:", error),
+        onError: (error) => {
+          errorToast(error.message);
+        },
       });
     } catch (error) {
       console.error("Error logging out:", error);

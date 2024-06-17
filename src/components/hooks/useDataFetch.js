@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { handleApiCall } from "../../global";
+import { errorToast, handleApiCall } from "../../global";
 import { useNavigate } from "react-router-dom";
 import { useLoadingBar } from "../context/LoadingContext";
 
@@ -90,6 +90,7 @@ const useDataFetch = (apiPath, globalcolumns) => {
   const onError = (error) => {
     setLoading(false);
     stopLoading();
+    errorToast(error.message);
     if (firstLoad) setFirstLoad(false);
   };
   const fetchFilteredData = () => {
