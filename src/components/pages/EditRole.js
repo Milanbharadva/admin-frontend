@@ -37,7 +37,7 @@ const EditRole = () => {
     };
     const onError = (error) => {
       errorToast(error.message);
-      navigate(getRoutePath("roles"));
+      navigate(getRoutePath("role"));
       setLoadingRole(false);
     };
     handleApiCall({
@@ -87,19 +87,10 @@ const EditRole = () => {
       setUpdating(true);
       const onSuccess = (result) => {
         successToast(result.message);
-        if (location.state) {
-          if (location.state.prevPath.split("?").length > 1) {
-            navigate(
-              getRoutePath(`roles?${location.state.prevPath.split("?")[1]}`),
-              {
-                state: { scrollY: location.state.scrollY },
-              }
-            );
-          } else {
-            navigate(getRoutePath("roles"));
-          }
+        if (location.state && location.state.prevPath.split("?").length > 1) {
+          navigate(-1);
         } else {
-          navigate(getRoutePath("roles"));
+          navigate(getRoutePath("role"));
         }
       };
       const onError = (error) => {
@@ -135,19 +126,13 @@ const EditRole = () => {
                         type="button"
                         className="btn btn-primary text-nowrap d-flex gap-1 align-items-center mt-2"
                         onClick={() => {
-                          if (location.state) {
-                            if (location.state.prevPath.split("?").length > 1) {
-                              navigate(
-                                getRoutePath(
-                                  `roles?${location.state.prevPath.split("?")[1]}`
-                                ),
-                                { state: { scrollY: location.state.scrollY } }
-                              );
-                            } else {
-                              navigate(getRoutePath("roles"));
-                            }
+                          if (
+                            location.state &&
+                            location.state.prevPath.split("?").length > 1
+                          ) {
+                            navigate(getRoutePath(-1));
                           } else {
-                            navigate(getRoutePath("roles"));
+                            navigate(getRoutePath("role"));
                           }
                         }}
                       >

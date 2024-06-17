@@ -19,7 +19,6 @@ const Permissions = () => {
     handleGlobalSearchChange,
     handleAddToURL,
   } = useDataFetch("/permissions/list", ["name", "slug"]);
-
   let paramvalues = new URLSearchParams(window.location.search);
   return (
     <div>

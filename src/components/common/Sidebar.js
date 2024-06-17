@@ -79,6 +79,7 @@ const Sidebar = ({ toggleSidebar }) => {
         try {
           const onSuccess = (result) => {
             setNavbarItems(result.data.records || []);
+            localStorage.removeItem("changed");
           };
           const onError = (error) => {
             errorToast(error.message);

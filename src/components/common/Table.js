@@ -212,7 +212,11 @@ const Table = ({
                   type="button"
                   className="btn btn-primary text-nowrap d-flex gap-1 align-items-center"
                   onClick={() => {
-                    navigate(getRoutePath(`${page.toLowerCase()}/create`));
+                    navigate(
+                      getRoutePath(
+                        `${page.substring(0, page.length - 1).toLowerCase()}/create`
+                      )
+                    );
                   }}
                 >
                   Add New
@@ -407,7 +411,7 @@ const Table = ({
                               onClick={(e) => {
                                 navigate(
                                   getRoutePath(
-                                    `${page.toLowerCase()}/edit/${item.id}`
+                                    `${page.substring(0, page.length - 1).toLowerCase()}/edit/${item.id}`
                                   ),
                                   {
                                     state: {

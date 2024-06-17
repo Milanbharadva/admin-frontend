@@ -134,10 +134,7 @@ const useDataFetch = (apiPath, globalcolumns) => {
     });
   };
   useEffect(() => {
-    if (
-      window.location.href.includes(apiPath.split("/")[1]) &&
-      window.location.search === ""
-    ) {
+    if (window.location.search === "") {
       if (firstLoad) {
         setLoading(true);
         fetchData();
@@ -146,10 +143,7 @@ const useDataFetch = (apiPath, globalcolumns) => {
         fetchData();
       }
     }
-    if (
-      window.location.href.includes(apiPath.split("/")[1]) &&
-      window.location.search !== ""
-    ) {
+    if (window.location.search !== "") {
       startLoading();
       fetchFilteredData();
     }

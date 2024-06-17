@@ -47,7 +47,7 @@ const CreatePermission = () => {
       const body = formdata;
       const onSuccess = (result) => {
         successToast(result.message);
-        navigate(getRoutePath("permissions"));
+        navigate(getRoutePath("permission"));
         setAdding(false);
       };
       const onError = (error) => {
@@ -77,7 +77,7 @@ const CreatePermission = () => {
                       type="button"
                       className="btn btn-primary text-nowrap d-flex gap-1 align-items-center mt-2"
                       onClick={() => {
-                        navigate(getRoutePath("permissions"));
+                        navigate(getRoutePath("permission"));
                       }}
                     >
                       List

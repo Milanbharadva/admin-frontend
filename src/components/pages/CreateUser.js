@@ -86,7 +86,7 @@ const CreateUser = () => {
       const body = formdata;
       const onSuccess = (result) => {
         successToast(result.message);
-        navigate(getRoutePath("users"));
+        navigate(getRoutePath("user"));
         setAdding(false);
       };
       const onError = (error) => {
@@ -146,7 +146,7 @@ const CreateUser = () => {
                       type="button"
                       className="btn btn-primary text-nowrap d-flex gap-1 align-items-center mt-2"
                       onClick={() => {
-                        navigate(getRoutePath("users"));
+                        navigate(getRoutePath("user"));
                       }}
                     >
                       List

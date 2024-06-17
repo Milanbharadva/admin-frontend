@@ -30,7 +30,7 @@ const EditPermission = () => {
     const onError = (error) => {
       errorToast(error.message);
       setLoading(false);
-      navigate(getRoutePath("permissions"));
+      navigate(getRoutePath("permission"));
     };
 
     handleApiCall({
@@ -73,21 +73,10 @@ const EditPermission = () => {
       setUpdating(true);
       const onSuccess = (result) => {
         successToast(result.message);
-        if (location.state) {
-          if (location.state.prevPath.split("?").length > 1) {
-            navigate(
-              getRoutePath(
-                `permissions?${location.state.prevPath.split("?")[1]}`
-              ),
-              {
-                state: { scrollY: location.state.scrollY },
-              }
-            );
-          } else {
-            navigate(getRoutePath("permissions"));
-          }
+        if (location.state && location.state.prevPath.split("?").length > 1) {
+          navigate(-1);
         } else {
-          navigate(getRoutePath("permissions"));
+          navigate(getRoutePath("permission"));
         }
       };
       const onError = (error) => {
@@ -122,19 +111,13 @@ const EditPermission = () => {
                         type="button"
                         className="btn btn-primary text-nowrap d-flex gap-1 align-items-center mt-2"
                         onClick={() => {
-                          if (location.state) {
-                            if (location.state.prevPath.split("?").length > 1) {
-                              navigate(
-                                getRoutePath(
-                                  `permissions?${location.state.prevPath.split("?")[1]}`
-                                ),
-                                { state: { scrollY: location.state.scrollY } }
-                              );
-                            } else {
-                              navigate(getRoutePath("permissions"));
-                            }
+                          if (
+                            location.state &&
+                            location.state.prevPath.split("?").length > 1
+                          ) {
+                            navigate(-1);
                           } else {
-                            navigate(getRoutePath("permissions"));
+                            navigate(getRoutePath("permission"));
                           }
                         }}
                       >

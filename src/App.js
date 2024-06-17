@@ -23,72 +23,72 @@ import Menus from "./components/pages/Menus";
 import { getRoutePath } from "./global";
 import Error from "./components/common/Error";
 
-console.log = console.warn = console.error = () => {};
+// console.log = console.warn = console.error = () => {};
 
 const routes = [
   {
-    path: getRoutePath("roles"),
+    path: getRoutePath("role"),
     component: Roles,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("roles/create"),
+    path: getRoutePath("role/create"),
     component: CreateRole,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("roles/edit/:id"),
+    path: getRoutePath("role/edit/:id"),
     component: EditRole,
     layout: DefaultLayout,
     protected: true,
   },
 
   {
-    path: getRoutePath("users"),
+    path: getRoutePath("user"),
     component: Users,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("users/create"),
+    path: getRoutePath("user/create"),
     component: CreateUser,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("users/edit/:id"),
+    path: getRoutePath("user/edit/:id"),
     component: EditUser,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("Permissions"),
+    path: getRoutePath("Permission"),
     component: Permissions,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("permissions/create"),
+    path: getRoutePath("permission/create"),
     component: CreatePermission,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("permissions/edit/:id"),
+    path: getRoutePath("permission/edit/:id"),
     component: EditPermission,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("configs"),
+    path: getRoutePath("config"),
     component: Configs,
     layout: DefaultLayout,
     protected: true,
   },
   {
-    path: getRoutePath("menus"),
+    path: getRoutePath("menu"),
     component: Menus,
     layout: DefaultLayout,
     protected: true,

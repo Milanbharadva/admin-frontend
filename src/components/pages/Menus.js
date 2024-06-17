@@ -110,6 +110,7 @@ export default function Menus() {
         body: JSON.parse(document.getElementById("nestableOutput").innerHTML),
         onSuccess: (result) => {
           successToast(result.message);
+          setLocalStorage("changed", true);
         },
         onError: (error) => {
           errorToast(error.message);

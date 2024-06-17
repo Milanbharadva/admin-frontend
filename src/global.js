@@ -58,7 +58,7 @@ export const handleApiCall = async ({
     } else if (error.response && error.response.status === 401) {
       removeLocalStorage("token");
       removeLocalStorage("userData");
-      window.location.href = window.location.origin + "/admin/login";
+      window.location.href = window.location.origin + getRoutePath("login");
     } else if (error.response && error.response.status === 403) {
       // errorToast(error.response.data.message);
       onError(error.response.data);
@@ -98,5 +98,5 @@ export function customLog(...messages) {
   console.log(`[${timestamp}]`, ...messages);
 }
 export function addBackendUrl(path) {
-  return `http://larareact.sys/${path}`;
+  return `http://localhost:4004/${path}`;
 }

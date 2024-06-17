@@ -54,7 +54,7 @@ const CreateRole = () => {
       setAdding(true);
       const onSuccess = (result) => {
         successToast(result.message);
-        navigate(getRoutePath("roles"));
+        navigate(getRoutePath("role"));
         setAdding(false);
       };
       const onError = (error) => {
@@ -84,7 +84,7 @@ const CreateRole = () => {
                       type="button"
                       className="btn btn-primary text-nowrap d-flex gap-1 align-items-center mt-2"
                       onClick={() => {
-                        navigate(getRoutePath("roles"));
+                        navigate(getRoutePath("role"));
                       }}
                     >
                       List

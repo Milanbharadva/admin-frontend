@@ -54,7 +54,7 @@ const EditUser = () => {
     const onError = (error) => {
       setLoading(false);
       errorToast(error.message);
-      navigate(getRoutePath("users"));
+      navigate(getRoutePath("user"));
     };
 
     handleApiCall({
@@ -105,19 +105,10 @@ const EditUser = () => {
       setUpdating(true);
       const onSuccess = (result) => {
         successToast(result.message);
-        if (location.state) {
-          if (location.state.prevPath.split("?").length > 1) {
-            navigate(
-              getRoutePath(`users?${location.state.prevPath.split("?")[1]}`),
-              {
-                state: { scrollY: location.state.scrollY },
-              }
-            );
-          } else {
-            navigate(getRoutePath("users"));
-          }
+        if (location.state && location.state.prevPath.split("?").length > 1) {
+          navigate(-1);
         } else {
-          navigate(getRoutePath("users"));
+          navigate(getRoutePath("user"));
         }
       };
       const onError = (error) => {
@@ -152,19 +143,10 @@ const EditUser = () => {
                       type="button"
                       className="btn btn-primary text-nowrap d-flex gap-1 align-items-center mt-2"
                       onClick={() => {
-                        if (location.state) {
-                          if (location.state.prevPath.split("?").length > 1) {
-                            navigate(
-                              getRoutePath(
-                                `users?${location.state.prevPath.split("?")[1]}`
-                              ),
-                              { state: { scrollY: location.state.scrollY } }
-                            );
-                          } else {
-                            navigate(getRoutePath("users"));
-                          }
+                        if (location.state.prevPath.split("?").length > 1) {
+                          navigate(-1);
                         } else {
-                          navigate(getRoutePath("users"));
+                          navigate(getRoutePath("user"));
                         }
                       }}
                     >
