@@ -110,7 +110,6 @@ export default function Menus() {
       body: formData,
       onSuccess: (result) => {
         setFormData(result.data);
-        console.log(result.data);
         setUpdating(true);
       },
       onError: (error) => {
@@ -277,16 +276,33 @@ export default function Menus() {
           </option>
         );
 
-        // Check if there are sub_menus and generate their options
         if (option.sub_menus && option.sub_menus.length > 0) {
           const subOptions = generateOptions(option.sub_menus);
-          return [mainOption, ...subOptions]; // Include the main option and its sub-options
+          return [mainOption, ...subOptions];
         } else {
-          return [mainOption]; // No sub-options, just return the main option
+          return [mainOption];
         }
       })
     );
   };
+  const generateOptionsSelected = (options) => {
+    if (!options || !Array.isArray(options)) return [];
+    return options.flatMap((option) => {
+      let mainOption = null;
+      if (option.parent_id !== formData.id && option.id !== formData.id) {
+        mainOption = (
+          <option value={option.id} key={option.id}>
+            {option.title}
+          </option>
+        );
+      }
+      const subOptions = option.sub_menus
+        ? generateOptionsSelected(option.sub_menus)
+        : [];
+      return [mainOption, ...subOptions].filter(Boolean);
+    });
+  };
+
   return (
     <main className="main" id="main">
       {loading ? (
@@ -407,7 +423,10 @@ export default function Menus() {
                             onChange={handleInputChange}
                           >
                             <option value="0">root</option>
-                            {!loading && generateOptions(userData)}
+                            {!loading &&
+                              (updating
+                                ? generateOptionsSelected(userData)
+                                : generateOptions(userData))}
                           </select>
                         </div>
                       </div>

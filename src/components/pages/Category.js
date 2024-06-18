@@ -106,7 +106,6 @@ export default function Category() {
       body: formData,
       onSuccess: (result) => {
         setFormData(result.data);
-        console.log(result.data);
         setUpdating(true);
       },
       onError: (error) => {
@@ -154,7 +153,6 @@ export default function Category() {
     e.preventDefault();
     let newItem;
     if (!!formData.parent_id) {
-      console.log({ ...formData });
       newItem = {
         id: Date.now(),
         text: formData.title,
@@ -272,7 +270,6 @@ export default function Category() {
           </option>
         );
 
-        // Check if there are sub_menus and generate their options
         if (option.sub_menus && option.sub_menus.length > 0) {
           const subOptions = generateOptions(option.sub_menus);
           return [mainOption, ...subOptions]; // Include the main option and its sub-options
@@ -282,6 +279,24 @@ export default function Category() {
       })
     );
   };
+  const generateOptionsSelected = (options) => {
+    if (!options || !Array.isArray(options)) return [];
+    return options.flatMap((option) => {
+      let mainOption = null;
+      if (option.parent_id !== formData.id && option.id !== formData.id) {
+        mainOption = (
+          <option value={option.id} key={option.id}>
+            {option.title}
+          </option>
+        );
+      }
+      const subOptions = option.sub_menus
+        ? generateOptionsSelected(option.sub_menus)
+        : [];
+      return [mainOption, ...subOptions].filter(Boolean);
+    });
+  };
+
   return (
     <main className="main" id="main">
       {loading ? (
@@ -403,7 +418,10 @@ export default function Category() {
                             onChange={handleInputChange}
                           >
                             <option value="0">root</option>
-                            {!loading && generateOptions(userData)}
+                            {!loading &&
+                              (updating
+                                ? generateOptionsSelected(userData)
+                                : generateOptions(userData))}
                           </select>
                         </div>
                       </div>
