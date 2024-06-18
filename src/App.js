@@ -22,6 +22,7 @@ import Configs from "./components/pages/Configs";
 import Menus from "./components/pages/Menus";
 import { getRoutePath } from "./global";
 import Error from "./components/common/Error";
+import Category from "./components/pages/Category";
 
 // console.log = console.warn = console.error = () => {};
 
@@ -82,7 +83,7 @@ const routes = [
     protected: true,
   },
   {
-    path: getRoutePath("config"),
+    path: getRoutePath("globalconfig"),
     component: Configs,
     layout: DefaultLayout,
     protected: true,
@@ -90,6 +91,12 @@ const routes = [
   {
     path: getRoutePath("menu"),
     component: Menus,
+    layout: DefaultLayout,
+    protected: true,
+  },
+  {
+    path: getRoutePath("category"),
+    component: Category,
     layout: DefaultLayout,
     protected: true,
   },

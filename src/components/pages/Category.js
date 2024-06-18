@@ -33,21 +33,20 @@ const styles = {
   formContainer: { padding: "2rem", backgroundColor: "#f9f9f9" },
 };
 
-export default function Menus() {
-  const intialFormData = {
-    title: "",
-    icon: "",
-    path: "",
-    parent_id: 0,
-    status: 1,
-  };
+export default function Category() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [idDelete, setIdDelete] = useState(true);
-  const [formData, setFormData] = useState(intialFormData);
+  const [formData, setFormData] = useState({
+    title: "",
+    icon: "",
+    path: "",
+    parent_id: "",
+    status: 1,
+  });
   const [icon, setIcon] = useState("");
   const [userData, setUserData] = useState(null);
-  const [updating, setUpdating] = useState(false);
+
   const FetchMenu = () => {
     let formData = new FormData();
     formData.append("sort_column", "id");
@@ -55,9 +54,6 @@ export default function Menus() {
     const onSuccess = (result) => {
       setUserData(result.data.records);
       setItems(convertToNestedFormat(result.data.records));
-      const userDatalocal = JSON.parse(getLocalStorage("userData"));
-      userDatalocal.menus = result.data.records;
-      setLocalStorage("userData", JSON.stringify(userDatalocal));
       setLoading(false);
     };
     const onError = (error) => {
@@ -66,7 +62,7 @@ export default function Menus() {
     };
     handleApiCall({
       method: "POST",
-      apiPath: "/menus/list",
+      apiPath: "/categories/list",
       body: formData,
       onSuccess,
       onError,
@@ -92,7 +88,7 @@ export default function Menus() {
     if (window.confirm("Are you sure You Want to delete menu")) {
       handleApiCall({
         method: "DELETE",
-        apiPath: `/menus/delete/${id}`,
+        apiPath: `/categories/delete/${id}`,
         onSuccess: (result) => {
           successToast(result.message);
           FetchMenu();
@@ -103,43 +99,11 @@ export default function Menus() {
       });
     }
   };
-  const handleGetSingleMenu = (id) => {
-    handleApiCall({
-      method: "GET",
-      apiPath: `/menus/detail/${id}`,
-      body: formData,
-      onSuccess: (result) => {
-        setFormData(result.data);
-        console.log(result.data);
-        setUpdating(true);
-      },
-      onError: (error) => {
-        errorToast(error);
-      },
-    });
-  };
-  const handleUpdateMenu = (e) => {
-    e.preventDefault();
-    handleApiCall({
-      method: "POST",
-      apiPath: `/menus/edit/${formData.id}`,
-      body: formData,
-      onSuccess: (result) => {
-        successToast(result.message);
-        FetchMenu();
-        setUpdating(false);
-        setFormData(intialFormData);
-      },
-      onError: (error) => {
-        errorToast(error);
-      },
-    });
-  };
   const handleSaveMenu = () => {
     if (document.getElementById("nestableOutput").innerHTML.length > 0) {
       handleApiCall({
         method: "POST",
-        apiPath: `/menus/update`,
+        apiPath: `/categories/update`,
         body: JSON.parse(document.getElementById("nestableOutput").innerHTML),
         onSuccess: (result) => {
           successToast(result.message);
@@ -185,7 +149,7 @@ export default function Menus() {
     const onError = (error) => errorToast(error.message);
     handleApiCall({
       method: "POST",
-      apiPath: "/menus/create",
+      apiPath: "/categories/create",
       body: newItem,
       onSuccess,
       onError,
@@ -202,7 +166,7 @@ export default function Menus() {
     };
     handleApiCall({
       method: "DELETE",
-      apiPath: `/menus/delete/${a}`,
+      apiPath: `/categories/delete/${a}`,
       onSuccess,
       onError,
     });
@@ -239,15 +203,6 @@ export default function Menus() {
                 <div>{item.title}</div>
               </div>
               <div className="dd-nodrag btn-group ml-auto align-self-end">
-                <button
-                  className="btn btn-sm btn-secondary"
-                  onClick={() => {
-                    handleGetSingleMenu(item.id);
-                  }}
-                  style={{ borderRight: "2px solid white" }}
-                >
-                  <i className="bi bi-pencil"></i>
-                </button>
                 <button
                   className="btn btn-sm btn-secondary"
                   onClick={() => {
@@ -362,8 +317,8 @@ export default function Menus() {
                 </main>
               </div>
               <div className="col-md-6" style={styles.formContainer}>
-                <h2>{updating ? "Update" : "Create"} Menu</h2>
-                <form>
+                <h2>Create Menu</h2>
+                <form onSubmit={handleSubmit}>
                   <div className="row mt-3">
                     {[
                       { label: "Title", name: "title" },
@@ -397,7 +352,7 @@ export default function Menus() {
                           htmlFor="parent_id"
                           className="text-nowrap col-2"
                         >
-                          Parent Menu
+                          Parent ID
                         </label>
                         <div className="input-group has-validation">
                           <select
@@ -432,23 +387,9 @@ export default function Menus() {
                     </div>
                   </div>
                   <div className="text-end mt-2">
-                    {updating ? (
-                      <button
-                        type="submit"
-                        className="btn btn-primary me-2"
-                        onClick={handleUpdateMenu}
-                      >
-                        Update
-                      </button>
-                    ) : (
-                      <button
-                        type="submit"
-                        className="btn btn-primary me-2"
-                        onClick={handleSubmit}
-                      >
-                        Submit
-                      </button>
-                    )}
+                    <button type="submit" className="btn btn-primary me-2">
+                      Submit
+                    </button>
                     <button type="reset" className="btn btn-secondary me-2">
                       Reset
                     </button>
