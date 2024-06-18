@@ -30,7 +30,7 @@ const styles = {
     color: "white",
     border: "none",
   },
-  formContainer: { padding: "2rem", backgroundColor: "#f9f9f9" },
+  formContainer: { padding: "1rem", backgroundColor: "#f9f9f9" },
 };
 
 export default function Menus() {
@@ -119,20 +119,22 @@ export default function Menus() {
   };
   const handleUpdateMenu = (e) => {
     e.preventDefault();
-    handleApiCall({
-      method: "POST",
-      apiPath: `/menus/edit/${formData.id}`,
-      body: formData,
-      onSuccess: (result) => {
-        successToast(result.message);
-        FetchMenu();
-        setUpdating(false);
-        setFormData(intialFormData);
-      },
-      onError: (error) => {
-        errorToast(error);
-      },
-    });
+    if (window.confirm("Are you sure you want to update menu?")) {
+      handleApiCall({
+        method: "POST",
+        apiPath: `/menus/edit/${formData.id}`,
+        body: formData,
+        onSuccess: (result) => {
+          successToast(result.message);
+          FetchMenu();
+          setUpdating(false);
+          setFormData(intialFormData);
+        },
+        onError: (error) => {
+          errorToast(error);
+        },
+      });
+    }
   };
   const handleSaveMenu = () => {
     if (document.getElementById("nestableOutput").innerHTML.length > 0) {
@@ -452,25 +454,46 @@ export default function Menus() {
                   </div>
                   <div className="text-end mt-2">
                     {updating ? (
-                      <button
-                        type="submit"
-                        className="btn btn-primary me-2"
-                        onClick={handleUpdateMenu}
-                      >
-                        Update
-                      </button>
+                      <>
+                        <button
+                          type="submit"
+                          className="btn btn-primary me-2"
+                          onClick={handleUpdateMenu}
+                        >
+                          Update
+                        </button>
+                        <button
+                          type="reset"
+                          className="btn btn-secondary me-2"
+                          onClick={(e) => {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to cancle edit?"
+                              )
+                            ) {
+                              e.preventDefault();
+                              setFormData(intialFormData);
+                              setUpdating(false);
+                            }
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </>
                     ) : (
-                      <button
-                        type="submit"
-                        className="btn btn-primary me-2"
-                        onClick={handleSubmit}
-                      >
-                        Submit
-                      </button>
+                      <>
+                        <button
+                          type="submit"
+                          className="btn btn-primary me-2"
+                          onClick={handleSubmit}
+                        >
+                          Submit
+                        </button>
+                        <button type="reset" className="btn btn-secondary me-2">
+                          Reset
+                        </button>
+                      </>
                     )}
-                    <button type="reset" className="btn btn-secondary me-2">
-                      Reset
-                    </button>
                   </div>
                 </form>
               </div>
