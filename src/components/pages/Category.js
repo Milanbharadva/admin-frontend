@@ -34,20 +34,20 @@ const styles = {
 };
 
 export default function Category() {
+  const intialFormData = {
+    title: "",
+    short_description: "",
+    description: "",
+    parent_id: 0,
+    status: 1,
+  };
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [idDelete, setIdDelete] = useState(true);
-  const [formData, setFormData] = useState({
-    title: "",
-    icon: "",
-    path: "",
-    parent_id: "",
-    status: 1,
-  });
-  const [icon, setIcon] = useState("");
+  const [formData, setFormData] = useState(intialFormData);
   const [userData, setUserData] = useState(null);
-
-  const FetchMenu = () => {
+  const [updating, setUpdating] = useState(false);
+  const FetchCategory = () => {
     let formData = new FormData();
     formData.append("sort_column", "id");
     formData.append("sort_by", "asc");
@@ -70,7 +70,7 @@ export default function Category() {
   };
 
   useEffect(() => {
-    FetchMenu();
+    FetchCategory();
   }, []);
   useEffect(() => {
     if (window.sortNestDemo && items.length > 0) {
@@ -84,14 +84,14 @@ export default function Category() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const handleDeleteMenu = (id) => {
-    if (window.confirm("Are you sure You Want to delete menu")) {
+  const handleDeleteCategory = (id) => {
+    if (window.confirm("Are you sure You Want to delete category")) {
       handleApiCall({
         method: "DELETE",
         apiPath: `/categories/delete/${id}`,
         onSuccess: (result) => {
           successToast(result.message);
-          FetchMenu();
+          FetchCategory();
         },
         onError: (error) => {
           errorToast(error);
@@ -99,7 +99,39 @@ export default function Category() {
       });
     }
   };
-  const handleSaveMenu = () => {
+  const handleGetSingleCategory = (id) => {
+    handleApiCall({
+      method: "GET",
+      apiPath: `/categories/detail/${id}`,
+      body: formData,
+      onSuccess: (result) => {
+        setFormData(result.data);
+        console.log(result.data);
+        setUpdating(true);
+      },
+      onError: (error) => {
+        errorToast(error);
+      },
+    });
+  };
+  const handleUpdateCategory = (e) => {
+    e.preventDefault();
+    handleApiCall({
+      method: "POST",
+      apiPath: `/categories/edit/${formData.id}`,
+      body: formData,
+      onSuccess: (result) => {
+        successToast(result.message);
+        FetchCategory();
+        setUpdating(false);
+        setFormData(intialFormData);
+      },
+      onError: (error) => {
+        errorToast(error);
+      },
+    });
+  };
+  const handleSaveCategory = () => {
     if (document.getElementById("nestableOutput").innerHTML.length > 0) {
       handleApiCall({
         method: "POST",
@@ -114,7 +146,7 @@ export default function Category() {
         },
       });
     } else {
-      successToast("Menu updated successfully");
+      successToast("Category updated successfully");
     }
   };
 
@@ -122,11 +154,11 @@ export default function Category() {
     e.preventDefault();
     let newItem;
     if (!!formData.parent_id) {
+      console.log({ ...formData });
       newItem = {
         id: Date.now(),
         text: formData.title,
         title: formData.title,
-        icon: icon.split(" ")[1],
         path: formData.path,
         status: formData.status,
         parent_id: parseInt(formData.parent_id),
@@ -136,7 +168,6 @@ export default function Category() {
         id: Date.now(),
         text: formData.title,
         title: formData.title,
-        icon: icon.split(" ")[1],
         path: formData.path,
         status: formData.status,
       };
@@ -144,7 +175,7 @@ export default function Category() {
 
     const onSuccess = (result) => {
       successToast(result.message);
-      FetchMenu();
+      FetchCategory();
     };
     const onError = (error) => errorToast(error.message);
     handleApiCall({
@@ -158,7 +189,7 @@ export default function Category() {
 
   const deleteItem = (id) => {
     const onSuccess = (result) => {
-      FetchMenu();
+      FetchCategory();
       warnToast(result.message);
     };
     const onError = (error) => {
@@ -206,7 +237,16 @@ export default function Category() {
                 <button
                   className="btn btn-sm btn-secondary"
                   onClick={() => {
-                    handleDeleteMenu(item.id);
+                    handleGetSingleCategory(item.id);
+                  }}
+                  style={{ borderRight: "2px solid white" }}
+                >
+                  <i className="bi bi-pencil"></i>
+                </button>
+                <button
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => {
+                    handleDeleteCategory(item.id);
                   }}
                 >
                   <i className="bi bi-trash"></i>
@@ -289,7 +329,7 @@ export default function Category() {
                     <div className="page">
                       <button
                         type="submit"
-                        onClick={handleSaveMenu}
+                        onClick={handleSaveCategory}
                         className="btn btn-primary me-2"
                       >
                         Save Changes
@@ -317,12 +357,13 @@ export default function Category() {
                 </main>
               </div>
               <div className="col-md-6" style={styles.formContainer}>
-                <h2>Create Menu</h2>
-                <form onSubmit={handleSubmit}>
+                <h2>{updating ? "Update" : "Create"} Category</h2>
+                <form>
                   <div className="row mt-3">
                     {[
                       { label: "Title", name: "title" },
-                      { label: "Path", name: "path" },
+                      { label: "short_description", name: "short_description" },
+                      { label: "description", name: "description" },
                     ].map((field) => (
                       <div className="mb-2" key={field.name}>
                         <div className="col-12 d-sm-flex gap-3 align-items-center">
@@ -352,7 +393,7 @@ export default function Category() {
                           htmlFor="parent_id"
                           className="text-nowrap col-2"
                         >
-                          Parent ID
+                          Parent Category
                         </label>
                         <div className="input-group has-validation">
                           <select
@@ -387,9 +428,23 @@ export default function Category() {
                     </div>
                   </div>
                   <div className="text-end mt-2">
-                    <button type="submit" className="btn btn-primary me-2">
-                      Submit
-                    </button>
+                    {updating ? (
+                      <button
+                        type="submit"
+                        className="btn btn-primary me-2"
+                        onClick={handleUpdateCategory}
+                      >
+                        Update
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        className="btn btn-primary me-2"
+                        onClick={handleSubmit}
+                      >
+                        Submit
+                      </button>
+                    )}
                     <button type="reset" className="btn btn-secondary me-2">
                       Reset
                     </button>
